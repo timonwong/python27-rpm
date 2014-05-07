@@ -1,0 +1,7 @@
+*.rpm
+*.tgz
+*.tar.gz
+
+src/
+libs/src/
+libs/output/
