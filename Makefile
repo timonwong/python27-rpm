@@ -4,31 +4,37 @@ VERSION=2.7.6
 PYTHON_SOURCE=Python-$(VERSION)
 PYTHON_TARBALL=$(PYTHON_SOURCE).tgz
 INSTALL_DIR=/opt/python$(MAJOR_VERSION)
+PYTHON_RPM=$(NAME)-$(VERSION)-1.$(shell uname -m).rpm
 
 INTERMEDIATE_INSTALL_DIR=/tmp/installdir-$(NAME)-$(VERSION)
 
 
-.PHONY: all clean package source
+.PHONY: all clean build install tarball
 
-all: package
+all: build install
 
 clean:
+	-rm -f $(PYTHON_TARBALL)
 	-rm -rf "$(PYTHON_SOURCE)"
 	-rm -rf "$(INTERMEDIATE_INSTALL_DIR)"
 
+tarball: $(PYTHON_TARBALL)
+
+build: $(PYTHON_RPM)
+
+install: build
+	-sudo rpm -Uvh *.rpm
 
 $(PYTHON_TARBALL):
 # Download python source
-	curl -LO http://mirrors.sohu.com/python/$(VERSION)/$(PYTHON_TARBALL)
+	curl --progress-bar -LO http://mirrors.sohu.com/python/$(VERSION)/$(PYTHON_TARBALL)
 
+$(PYTHON_RPM): $(PYTHON_TARBALL)
+	echo $@
 
-source: $(PYTHON_TARBALL)
-
-
-package: $(PYTHON_TARBALL)
 	-mkdir -p src
 	-mkdir -p $(INTERMEDIATE_INSTALL_DIR)
-	tar -xvf $(PYTHON_SOURCE).tgz -C src/
+	tar -xvf $< -C src/
 
 	# Build python
 	cd src/$(PYTHON_SOURCE) && \
@@ -38,8 +44,8 @@ package: $(PYTHON_TARBALL)
 		make -j2 && \
 		make install DESTDIR=$(INTERMEDIATE_INSTALL_DIR)
 
-	-rm -f "$(NAME)-$(VERSION)"-*.rpm
-	fpm -s dir -t rpm -n $(NAME) -v '$(VERSION)' \
+	fpm -s dir -t -f rpm -n $(NAME) -v '$(VERSION)' \
+		-p "$@" \
 		-d 'openssl' \
 		-d 'bzip2' \
 		-d 'zlib' \
