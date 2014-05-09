@@ -14,7 +14,8 @@ INTERMEDIATE_INSTALL_DIR=/tmp/installdir-$(NAME)-$(VERSION)
 all: build install
 
 clean:
-	-rm -f $(PYTHON_TARBALL)
+	-rm -f "$(PYTHON_TARBALL)"
+	-rm -f "$(PYTHON_RPM)"
 	-rm -rf "$(PYTHON_SOURCE)"
 	-rm -rf "$(INTERMEDIATE_INSTALL_DIR)"
 
