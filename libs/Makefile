@@ -1,4 +1,6 @@
+# PYTHON27的RPM安装包名称
 PYTHON_PACKAGE_PREFIX=python27
+# PYTHON27的安装路径
 PYTHON_INSTALL_DIR=/opt/python2.7
 
 EPOCH=1
@@ -71,7 +73,6 @@ clean:
 	-rm -rf src/
 	-rm -f $(RPMS)
 
-
 tarballs: $(TARBALLS)
 
 setuptools: $(SETUPTOOLS_RPM)
@@ -86,8 +87,8 @@ supervisor: $(SUPERVISOR_RPM)
 
 pip: $(PIP_RPM)
 
-
 $(TARBALLS):
+# 下载源码包
 	curl --progress-bar -LO $(PYPI_SOURCE_URL)/$(shell echo $@ | head -c 1)/$(shell echo $@ | cut -d'-' -f 1)/$@
 
 $(SETUPTOOLS_RPM): $(SETUPTOOLS_TARBALL)
@@ -96,7 +97,6 @@ $(SETUPTOOLS_RPM): $(SETUPTOOLS_TARBALL)
 	fpm $(FPM_FLAGS) \
 		src/$(SETUPTOOLS_NAME)/setup.py
 	-sudo rpm -Uvh $@
-
 
 $(VIRTUALENV_RPM): $(VIRTUALENV_TARBALL) $(SETUPTOOLS_RPM)
 	-mkdir -p src
@@ -113,14 +113,12 @@ $(WHEEL_RPM): $(WHEEL_TARBALL) $(SETUPTOOLS_RPM)
 		src/$(WHEEL_NAME)/setup.py
 	-sudo rpm -Uvh $@
 
-
 $(MELD3_RPM): $(MELD3_TARBALL) $(SETUPTOOLS_RPM)
 	-mkdir -p src
 	tar -xf $< -C src/
 	fpm $(FPM_FLAGS) \
 		src/$(MELD3_NAME)/setup.py
 	-sudo rpm -Uvh $@
-
 
 $(SUPERVISOR_RPM): $(SUPERVISOR_TARBALL) $(MELD3_RPM)
 	-mkdir -p src
@@ -129,7 +127,6 @@ $(SUPERVISOR_RPM): $(SUPERVISOR_TARBALL) $(MELD3_RPM)
 		-d '$(PYTHON_PACKAGE_PREFIX)-meld3' \
 		src/$(SUPERVISOR_NAME)/setup.py
 	-sudo rpm -Uvh $@
-
 
 $(PIP_RPM): $(PIP_TARBALL) $(SETUPTOOLS_RPM)
 	-mkdir -p src
