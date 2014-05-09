@@ -37,7 +37,7 @@ $(PYTHON_RPM): $(PYTHON_TARBALL)
 	-mkdir -p $(INTERMEDIATE_INSTALL_DIR)
 	tar -xvf $< -C src/
 
-	# Build python
+# Build python
 	cd src/$(PYTHON_SOURCE) && \
 		LDFLAGS="-Wl,-rpath=${INSTALL_DIR}/lib ${LDFLAGS}" \
 			./configure --prefix=${INSTALL_DIR} --enable-unicode=ucs4 \
@@ -45,6 +45,7 @@ $(PYTHON_RPM): $(PYTHON_TARBALL)
 		make -j2 && \
 		make install DESTDIR=$(INTERMEDIATE_INSTALL_DIR)
 
+# Package python into rpm
 	fpm -s dir -t -f rpm -n $(NAME) -v '$(VERSION)' \
 		-p "$@" \
 		-d 'openssl' \
