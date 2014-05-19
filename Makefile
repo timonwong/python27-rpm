@@ -1,15 +1,7 @@
-NAME=python27
-MAJOR_VERSION=2.7
-VERSION=2.7.6
-PYTHON_SOURCE=Python-$(VERSION)
-PYTHON_TARBALL=$(PYTHON_SOURCE).tgz
-INSTALL_DIR=/opt/python$(MAJOR_VERSION)
-PYTHON_RPM=$(NAME)-$(VERSION)-1.$(shell uname -m).rpm
+include config.mk
 
-INTERMEDIATE_INSTALL_DIR=/tmp/installdir-$(NAME)-$(VERSION)
-
-
-.PHONY: all clean build install tarball
+SOURCE_DIR=/tmp/sourcedir-$(PYTHON_NAME)-$(PYTHON_FULL_VERSION)
+BUILD_DIR=/tmp/installdir-$(PYTHON_NAME)-$(PYTHON_FULL_VERSION)
 
 all: build install
 
@@ -17,36 +9,34 @@ clean:
 	-rm -f "$(PYTHON_TARBALL)"
 	-rm -f "$(PYTHON_RPM)"
 	-rm -rf "$(PYTHON_SOURCE)"
-	-rm -rf "$(INTERMEDIATE_INSTALL_DIR)"
+	-rm -rf "$(BUILD_DIR)"
 
 tarball: $(PYTHON_TARBALL)
 
 build: $(PYTHON_RPM)
 
 install: build
-	-sudo rpm -Uvh *.rpm
+	-sudo rpm -Uvh $(PYTHON_RPM)
 
 $(PYTHON_TARBALL):
 # Download python source
-	curl --progress-bar -LO http://mirrors.sohu.com/python/$(VERSION)/$(PYTHON_TARBALL)
+	curl --progress-bar -LO $(PYTHON_SOURCE_TARBALL_DOWNLOAD_MIRROR)/$(PYTHON_FULL_VERSION)/$(PYTHON_TARBALL)
 
 $(PYTHON_RPM): $(PYTHON_TARBALL)
-	echo $@
-
-	-mkdir -p src
-	-mkdir -p $(INTERMEDIATE_INSTALL_DIR)
-	tar -xvf $< -C src/
+	-mkdir -p "$(SOURCE_DIR)"
+	-mkdir -p "$(BUILD_DIR)"
+	tar -xvf $< -C "$(SOURCE_DIR)/"
 
 # Build python
-	cd src/$(PYTHON_SOURCE) && \
-		LDFLAGS="-Wl,-rpath=${INSTALL_DIR}/lib ${LDFLAGS}" \
-			./configure --prefix=${INSTALL_DIR} --enable-unicode=ucs4 \
+	cd $(SOURCE_DIR)/$(PYTHON_SOURCE) && \
+		LDFLAGS="-Wl,-rpath=\"$(PYTHON_INSTALL_DIR)/lib\" $(LDFLAGS)" \
+			./configure --prefix="$(PYTHON_INSTALL_DIR)" --enable-unicode=ucs4 \
 				--enable-shared --enable-ipv6 && \
 		make -j2 && \
-		make install DESTDIR=$(INTERMEDIATE_INSTALL_DIR)
+		make install DESTDIR="$(BUILD_DIR)"
 
 # Package python into rpm
-	fpm -s dir -t -f rpm -n $(NAME) -v '$(VERSION)' \
+	fpm -f -s dir -t rpm -n $(PYTHON_NAME) -v '$(PYTHON_FULL_VERSION)' \
 		-p "$@" \
 		-d 'openssl' \
 		-d 'bzip2' \
@@ -56,6 +46,9 @@ $(PYTHON_RPM): $(PYTHON_TARBALL)
 		-d 'sqlite' \
 		-d 'ncurses' \
 		-d 'readline' \
-		--directories=$(INSTALL_DIR)/lib/python$(MAJOR_VERSION)/ \
-		--directories=$(INSTALL_DIR)/include/python$(MAJOR_VERSION)/ \
-		-C $(INTERMEDIATE_INSTALL_DIR) .
+		--directories="$(PYTHON_INSTALL_DIR)/lib/python$(PYTHON_MAJOR_VERSION)/" \
+		--directories="$(PYTHON_INSTALL_DIR)/include/python$(PYTHON_MAJOR_VERSION)/" \
+		-C "$(BUILD_DIR)" .
+
+
+.PHONY: all clean build install tarball
