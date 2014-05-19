@@ -16,7 +16,7 @@ tarball: $(PYTHON_TARBALL)
 build: $(PYTHON_RPM)
 
 install: build
-	-sudo rpm -Uvh $(PYTHON_RPM)
+	-rpm -Uvh $(PYTHON_RPM)
 
 $(PYTHON_TARBALL):
 # Download python source
