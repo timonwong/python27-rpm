@@ -82,7 +82,7 @@ $(SETUPTOOLS_RPM): $(SETUPTOOLS_TARBALL)
 	-mkdir -p src
 	tar -xf $< -C src/
 	fpm $(FPM_FLAGS) \
-		src/$(SETUPTOOLS_NAME)/setup.py
+	    -C src/$(SETUPTOOLS_NAME) src/$(SETUPTOOLS_NAME)/setup.py
 	-rpm -Uvh $@
 
 $(VIRTUALENV_RPM): $(VIRTUALENV_TARBALL) $(SETUPTOOLS_RPM)
@@ -90,21 +90,21 @@ $(VIRTUALENV_RPM): $(VIRTUALENV_TARBALL) $(SETUPTOOLS_RPM)
 	tar -xf $< -C src/
 	fpm $(FPM_FLAGS) \
 		-d '$(PYTHON_NAME)-setuptools' \
-		src/$(VIRTUALENV_NAME)/setup.py
+		-C src/$(VIRTUALENV_NAME) src/$(VIRTUALENV_NAME)/setup.py
 	-rpm -Uvh $@
 
 $(WHEEL_RPM): $(WHEEL_TARBALL) $(SETUPTOOLS_RPM)
 	-mkdir -p src
 	tar -xf $< -C src/
 	fpm $(FPM_FLAGS) \
-		src/$(WHEEL_NAME)/setup.py
+		-C src/$(WHEEL_NAME) src/$(WHEEL_NAME)/setup.py
 	-rpm -Uvh $@
 
 $(MELD3_RPM): $(MELD3_TARBALL) $(SETUPTOOLS_RPM)
 	-mkdir -p src
 	tar -xf $< -C src/
 	fpm $(FPM_FLAGS) \
-		src/$(MELD3_NAME)/setup.py
+		-C src/$(MELD3_NAME) src/$(MELD3_NAME)/setup.py
 	-rpm -Uvh $@
 
 $(SUPERVISOR_RPM): $(SUPERVISOR_TARBALL) $(MELD3_RPM)
@@ -112,12 +112,12 @@ $(SUPERVISOR_RPM): $(SUPERVISOR_TARBALL) $(MELD3_RPM)
 	tar -xf $< -C src/
 	fpm $(FPM_FLAGS) \
 		-d '$(PYTHON_NAME)-meld3' \
-		src/$(SUPERVISOR_NAME)/setup.py
+		-C src/$(SUPERVISOR_NAME) src/$(SUPERVISOR_NAME)/setup.py
 	-rpm -Uvh $@
 
 $(PIP_RPM): $(PIP_TARBALL) $(SETUPTOOLS_RPM)
 	-mkdir -p src
 	tar -xf $< -C src/
 	fpm $(FPM_FLAGS) \
-		src/$(PIP_NAME)/setup.py
+		-C src/$(PIP_NAME) src/$(PIP_NAME)/setup.py
 	-rpm -Uvh $@
